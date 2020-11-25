@@ -3,6 +3,7 @@
 ### an overall network
 ## store networks in file/DB for quick access
 
+import json
 import re
 
 def create_scenes_dict(this_text):
@@ -25,8 +26,12 @@ def create_scenes_dict(this_text):
         if not found[0]:
             found[-1] = found[-1].replace('.\n',' ').replace('\n',' ').lstrip()
             temp.append(found[1:])
+    
+#     for i,e in enumerate(temp):
+#         if e and (((e[0].startswith('SCENE')) or (e[0].startswith('Scene')))):
+#             print(i,e)
             
-    scene_indices = [i for i, e in enumerate(temp) if ((e[0].startswith('SCENE')) or (e[0].startswith('Scene')))]
+    scene_indices = [i for i, e in enumerate(temp) if e and ((e[0].startswith('SCENE')) or (e[0].startswith('Scene')))]
     scene_indices.append(len(temp))
     
     these_scenes = []
@@ -124,11 +129,42 @@ if __name__ == '__main__':
         'path': 'data/othello.txt',
         'node_color':'#9999ff',
         'title': 'Othello, the Moor of Venice'
+    },
+    'hamlet':{
+        'url':'https://www.gutenberg.org/files/1524/1524-0.txt',
+        'path': 'data/hamlet.txt',
+        'node_color': '#ffbc66',
+        'title': 'Hamlet'
+    },
+    'caesar':{
+        'url': 'https://www.gutenberg.org/files/1522/1522-0.txt',
+        'path': 'data/caesar.txt',
+        'node_color': '#9AB1E1',
+        'title': 'Julius Caesar'
+    },
+    'macbeth':{
+        'url': 'https://www.gutenberg.org/files/1533/1533-0.txt',
+        'path': 'data/macbeth.txt',
+        'node_color': '#FF9999',
+        'title': 'Macbeth'
+    },
+    'midsummer':{
+        'url': 'https://www.gutenberg.org/files/1514/1514-0.txt',
+        'path': 'data/midsummer.txt',
+        'node_color': '#e1a79a',
+        'title': 'A Midsummer Night’s Dream'
     }
 }
     
+    all_dicts = {}    
     for entry in SHAKESPEARE.keys():
         this_data = get_data(entry)
         chars, acts = get_chars_acts(this_data)
         full_dict = create_acts_dict(acts) # contains a dict of dicts with characters & lines by turn
+        all_dicts[entry] = full_dict
         
+        with open(f'data/{entry}_acts_scenes.json', 'w') as outfile:
+            json.dump(full_dict, outfile) 
+        
+    with open('data/shakespeare_acts_scenes.json', 'w') as outfile:
+        json.dump(all_dicts, outfile)        
