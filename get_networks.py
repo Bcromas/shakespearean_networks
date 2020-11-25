@@ -1,5 +1,3 @@
-# create file to:
-## pull down & process text for plays
 ## generate networks:
 ### networks by act & scene
 ### an overall network
@@ -7,25 +5,41 @@
 
 import re
 
-def get_scenes(this_text):
+def create_scenes_dict(this_text):
     """
-    """
-    found = re.findall(r'\b([A-Z]+\s?[A-Z]+?)\b', this_text)
+    Extract the individual scenes from an act and create a dictionary.
     
-    scene_indices = [i for i, e in enumerate(found) if ((e.startswith('SCENE')) or (e.startswith('Scene')))]
-    scene_indices.append(len(found))
+    Args:
+        this_text - str; the text of an act.
+    
+    Returns:
+        scenes_dict - dict; keys are the titles of scenes (e.g. 'SCENE I') and values are lists of lists where the zeroth element is a character's name and the first element is their line as a str.
+    """
+    this_text_clean = this_text.split('\n\n')
+    this_text_clean = [i.strip() for i in this_text_clean if len(i)>0] # list of str
+    
+    temp = []
+    scene_indices = []
+    for i in this_text_clean:
+        found = re.split(r'\b([A-Z]+\s?[A-Z]+?)\b', i) # if split re creates a split the first element in resulting list will be empty, we're relying on that in the conditional below
+        if not found[0]:
+            found[-1] = found[-1].replace('.\n',' ').replace('\n',' ').lstrip()
+            temp.append(found[1:])
+            
+    scene_indices = [i for i, e in enumerate(temp) if ((e[0].startswith('SCENE')) or (e[0].startswith('Scene')))]
+    scene_indices.append(len(temp))
     
     these_scenes = []
     these_bodies = []
     for j in scene_indices:
         try:
-          these_chars = found[j:scene_indices[scene_indices.index(j)+1]]
-          this_scene = these_chars.pop(0)
-
-          these_scenes.append(this_scene)
-          these_bodies.append(these_chars)
-        except:
-          pass
+            these_chars = temp[j:scene_indices[scene_indices.index(j)+1]]
+            this_scene = these_chars.pop(0)
+            
+            these_scenes.append(this_scene[0].upper())
+            these_bodies.append(these_chars)
+        except Exception as e:
+            pass
 
     scenes_dict = dict(zip(these_scenes, these_bodies))
     
@@ -33,28 +47,28 @@ def get_scenes(this_text):
 
 def create_acts_dict(acts):
     """
-    Extract the individual acts and create a dictionary where keys are the titles of acts and the values are the text of the scenes.
+    Extract the individual acts and create a dictionary where keys are the titles of acts and values are the text of the scenes.
     
     Args:
-        acts - str; the main text of the play
+        acts - str; the main text of the play.
         
     Returns:
-        acts_dict - dict; dict where keys are the titles of acts and the values are the text of the scenes
+        acts_dict - dict; dict of dicts where keys are the titles of acts (e.g. 'ACT II') and values are dicts of scenes. 
     """
     these_acts = []
     these_bodies = []
     while acts:
-      this_item = acts.pop(0)
-      if len(this_item)<100:
-        these_acts.append(this_item)
-      else:
-        scenes_dict = get_scenes(this_item)
-        these_bodies.append(scenes_dict)
+        this_item = acts.pop(0)
+        if len(this_item)<100:
+            these_acts.append(this_item)
+        else:
+            scenes_dict = create_scenes_dict(this_item)
+            these_bodies.append(scenes_dict)
     assert not acts, 'Check acts var. Still contains content.'
     assert (len(these_acts)==5) and (len(these_bodies)==5), 'Verify lists generation. Play should have five acts.'
     
     acts_dict = dict(zip(these_acts,these_bodies))
-    
+        
     return acts_dict
     
 
@@ -66,8 +80,8 @@ def get_chars_acts(data):
         data - str; the text of the play. 
         
     Returns:
-        characters - str; the initial list of characters & general setting of the play 
-        acts - str; the main text of the play; the acts and scenes
+        characters - str; the initial list of characters & general setting of the play.
+        acts - str; the main text of the play; the acts and scenes.
     """
     _, body, _ = re.split(r'\*{3}[^\*]+THIS PROJECT GUTENBERG EBOOK[^\*]+\*{3}', data) # find body of text, discard header & footer
     assert len(body) >= 0.8*len(data), 'Verify split of body, header, & footer. May have bad split.'
@@ -87,7 +101,7 @@ def get_data(play):
         this_play - str; the play to retrieve.
         
     Returns:
-        data - str; the contents of the file
+        data - str; the contents of the file.
     """
     this_file = open(SHAKESPEARE[play]['path'], 'r')
     data = this_file.read()
@@ -116,7 +130,5 @@ if __name__ == '__main__':
     for entry in SHAKESPEARE.keys():
         this_data = get_data(entry)
         chars, acts = get_chars_acts(this_data)
-        acts_dict = create_acts_dict(acts) # acts_dict is 
+        full_dict = create_acts_dict(acts) # contains a dict of dicts with characters & lines by turn
         
-        print(entry, acts_dict.values())
-                
