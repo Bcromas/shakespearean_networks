@@ -1,8 +1,3 @@
-## generate networks:
-### networks by act & scene
-### an overall network
-## store networks in file/DB for quick access
-
 import json
 import re
 
