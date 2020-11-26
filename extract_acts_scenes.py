@@ -158,8 +158,8 @@ if __name__ == '__main__':
         full_dict = create_acts_dict(acts) # contains a dict of dicts with characters & lines by turn
         all_dicts[entry] = full_dict
         
-        with open(f'data/{entry}_acts_scenes.json', 'w') as outfile:
+        with open(f'output/{entry}_acts_scenes.json', 'w') as outfile:
             json.dump(full_dict, outfile) 
         
-    with open('data/shakespeare_acts_scenes.json', 'w') as outfile:
+    with open('output/shakespeare_acts_scenes.json', 'w') as outfile:
         json.dump(all_dicts, outfile)        
