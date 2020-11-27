@@ -28,5 +28,5 @@
 ### Below is a visualization of the largest component based on character dialogue in Julius Caesar. The sizes of the nodes reflect how frequently a character speaks and the width of the edges reflect the frequency of turns between the two characters.
 <img src='images/caesar.png' width="750">
 
-### [Click here to see visualizations of the largest component from all of the plays.]()
+### [Click here to see visualizations of the largest component from all of the plays.](https://github.com/Bcromas/shakespearean_networks/blob/main/output/all_graphs.png)
 <img src='output/all_graphs.png' width="750">
