@@ -21,11 +21,7 @@ def create_scenes_dict(this_text):
         if not found[0]:
             found[-1] = found[-1].replace('.\n',' ').replace('\n',' ').lstrip()
             temp.append(found[1:])
-    
-#     for i,e in enumerate(temp):
-#         if e and (((e[0].startswith('SCENE')) or (e[0].startswith('Scene')))):
-#             print(i,e)
-            
+                
     scene_indices = [i for i, e in enumerate(temp) if e and ((e[0].startswith('SCENE')) or (e[0].startswith('Scene')))]
     scene_indices.append(len(temp))
     
@@ -88,7 +84,7 @@ def get_chars_acts(data):
     
     _, body = re.split(r'\bDramatis\sPerson.', body) # find body of text, discard table of contents
     characters, *acts = re.split(r'\b(ACT\s\w+)', body) # characters contains the initial listing of characters & general setting; acts contains the main text of the play
-    assert sum([len(i) for i in acts]) >= 0.95*len(body), 'Verify split of acts. May have bad split.'
+    assert sum([len(i) for i in acts]) >= 0.85*len(body), 'Verify split of acts. May have bad split.'
     
     return characters, acts
     
@@ -111,51 +107,18 @@ def get_data(play):
     
     
 if __name__ == '__main__':
-    
-    SHAKESPEARE = {
-    'romeo':{
-        'url':'https://www.gutenberg.org/files/1513/1513-0.txt',
-        'path': 'data/romeo.txt',
-        'node_color': '#ca9ae1',
-        'title': 'Romeo & Juliet'
-    },
-    'othello':{
-        'url':'https://www.gutenberg.org/files/1531/1531-0.txt',
-        'path': 'data/othello.txt',
-        'node_color':'#9999ff',
-        'title': 'Othello, the Moor of Venice'
-    },
-    'hamlet':{
-        'url':'https://www.gutenberg.org/files/1524/1524-0.txt',
-        'path': 'data/hamlet.txt',
-        'node_color': '#ffbc66',
-        'title': 'Hamlet'
-    },
-    'caesar':{
-        'url': 'https://www.gutenberg.org/files/1522/1522-0.txt',
-        'path': 'data/caesar.txt',
-        'node_color': '#9AB1E1',
-        'title': 'Julius Caesar'
-    },
-    'macbeth':{
-        'url': 'https://www.gutenberg.org/files/1533/1533-0.txt',
-        'path': 'data/macbeth.txt',
-        'node_color': '#FF9999',
-        'title': 'Macbeth'
-    },
-    'midsummer':{
-        'url': 'https://www.gutenberg.org/files/1514/1514-0.txt',
-        'path': 'data/midsummer.txt',
-        'node_color': '#e1a79a',
-        'title': 'A Midsummer Night’s Dream'
-    }
-}
+        
+    SHAKESPEARE = None
+    with open('play_details.json') as f:
+        SHAKESPEARE = json.load(f)
     
     all_dicts = {}    
     for entry in SHAKESPEARE.keys():
+        print(f'\nProcessing {SHAKESPEARE[entry]["title"]}...')
         this_data = get_data(entry)
         chars, acts = get_chars_acts(this_data)
         full_dict = create_acts_dict(acts) # contains a dict of dicts with characters & lines by turn
+        print('Scenes in each act: ',[len(full_dict[i].keys()) for i in full_dict.keys()])
         all_dicts[entry] = full_dict
         
         with open(f'output/{entry}_acts_scenes.json', 'w') as outfile:
